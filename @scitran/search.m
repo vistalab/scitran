@@ -46,10 +46,11 @@ function [result, srch] = search(obj,srch,varargin)
 %     'summary'    - print out a summary of the number of search items
 %                    returned (boolean, default false}
 %     'limit'      - upper limit on the number of returned objects
-%     'fw'         - convert the SearchResponse returns to a Flywheel
+%     'container'  - convert the SearchResponse returns to a Flywheel
 %                    container before returning
 %     'sort label' - Sort the returned objects by a label (not yet
-%                    implemented).
+%                    implemented)
+%     'single'     - If a single return, return the object not a cell
 %
 % Returns:
 %  result:  A cell array of data structs that match the search parameters
@@ -163,7 +164,8 @@ p.addRequired('srch');
 p.addParameter('alldata',false,@islogical);
 p.addParameter('summary',false,@islogical);
 p.addParameter('sortlabel',[],@ischar);
-p.addParameter('fw',false,@islogical);   % Convert search to object
+p.addParameter('container',false,@islogical);   % Convert search to object
+p.addParameter('fw',false,@islogical);          % Backwards compatible with container 
 
 % -1 is unlimited.  But it turns out Flywheel has a limit
 p.addParameter('limit',10000,@isscalar);   % Max allowed by flywheel
@@ -196,7 +198,8 @@ summary   = p.Results.summary;
 sortlabel = p.Results.sortlabel;
 allData   = p.Results.alldata;
 limit     = p.Results.limit;
-fw        = p.Results.fw;
+fw        = p.Results.fw;          % Synonym to container
+container = p.Results.container;   % If either is true, run search2container
 
 % Validate the return type string.
 if ischar(srch), test = srch;
@@ -292,7 +295,7 @@ if ischar(srch)
                 % We manage an upper limit on the number of returns
                 % at the end. 
                 limit = val;
-            case {'fw'}
+            case {'container','fw'}
                 % Ignore - We manage this at the end.
                 
             % GROUP
@@ -510,15 +513,15 @@ if ischar(srch)
                 else
                     srch.filters{end+1}.terms.file0x2Ename = {val};
                 end
+            case {'fileid'}
                 % There is not yet an id for a file.  When that comes,
                 % uncomment this.
-                %             case {'fileid'}
-                %                 % Not tested.
-                %                 if ~isfield(srch,'filters')
-                %                     srch.filters{1}.match.file0x2E_id = val;
-                %                 else
-                %                     srch.filters{end+1}.match.file0x2E_id = val;
-                %                 end
+                % Not tested.
+                if ~isfield(srch,'filters')
+                    srch.filters{1}.match.file0x2E_id = val;
+                else
+                    srch.filters{end+1}.match.file0x2E_id = val;
+                end
             case {'filetype'}
                 % Nifti, dicom, bvec, bval,montage ...
                 % This checking could include force to lower case and
@@ -677,7 +680,7 @@ if summary
     end
 end
 
-if fw  % Convert the search responses to their Flywheel data format
+if (fw || container)  % Convert the search responses to their Flywheel data format
     result = stSearch2Container(obj,result);
 end
 
