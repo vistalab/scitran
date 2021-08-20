@@ -681,7 +681,9 @@ if summary
 end
 
 if (fw || container)  % Convert the search responses to their Flywheel data format
-    result = stSearch2Container(obj,result);
+    if ~isempty(result)
+        result = stSearch2Container(obj,result);
+    end
 end
 
 
