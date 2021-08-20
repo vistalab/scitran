@@ -664,6 +664,8 @@ else
     result = srchResult;
 end
 
+if isempty(result), fprintf('No results returned\n'); return; end
+
 %% Deal with sortlab or summary flag
 
 if ~isempty(sortlabel)
@@ -680,12 +682,9 @@ if summary
     end
 end
 
-if (fw || container)  % Convert the search responses to their Flywheel data format
-    if ~isempty(result)
-        result = stSearch2Container(obj,result);
-    end
+if (fw || container) && ~isempty(result) % Convert the search responses to their Flywheel data format
+    result = stSearch2Container(obj,result);
 end
-
 
 end
 
