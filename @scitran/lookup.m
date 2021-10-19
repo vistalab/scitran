@@ -58,7 +58,7 @@ result = st.fw.lookup(str);
 if full && ~isempty(result.infoExists)
     % Get the whole container
     result = st.fw.get(result.id);
-elseif result.infoExists
+elseif isfield(result,'infoExists') && result.infoExists
     % Warn the user
     disp('This is a partial container.  Other info exists');
 end
