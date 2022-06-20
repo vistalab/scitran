@@ -92,7 +92,9 @@ varargin = stParamFormat(varargin);
 
 p.addRequired('st',@(x)(isa(x,'scitran')));
 p.addRequired('object');
-p.addRequired('metadata',@(x)(isstruct(x) || ischar(x)));
+
+% Probably needs to be modified to allow notes and tags
+p.addRequired('metadata',@(x)(isa(x,'flywheel.model.CommonInfo')));
 
 % The data can be added to an info slot or treated as a tag or a note
 validInfo = {'info','note','tag','classification'};
@@ -174,7 +176,7 @@ switch containerType
         end
         info = st.fw.getAnalysis(containerID);
         
-    case 'file'
+    case 'fileentry'
         % Files are inside of different types of containers.  The call
         % for setting the info on a file differs depending on the type
         % of container it is in.
@@ -183,16 +185,16 @@ switch containerType
         % didn't understand Justin's response last time. (BW).
         switch (fileContainerType)
             case 'project'
-                fw.setProjectFileInfo(containerID,fname,metadata);
+                st.fw.setProjectFileInfo(containerID,fname,metadata);
                 info = st.fw.getProjectFileInfo;
             case 'session'
-                fw.setSessionFileInfo(containerID,fname,metadata);
+                st.fw.setSessionFileInfo(containerID,fname,metadata);
                 info = st.fw.getSessionFileInfo;
             case 'acquisition'
-                fw.setAcquisitionFileInfo(containerID,fname,metadata);
+                st.fw.setAcquisitionFileInfo(containerID,fname,metadata);
                 info = st.fw.getAcquisitionFileInfo;
             case 'collection'
-                fw.setCollectionFileInfo(containerID,fname,metadata);
+                st.fw.setCollectionFileInfo(containerID,fname,metadata);
                 info = st.fw.getCollectionFileInfo;
         end
         

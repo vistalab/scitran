@@ -1,5 +1,5 @@
 function [containerID, containerType, fileContainerType, fname, fileType] = ...
-    objectParse(~, object,containerType, containerID)
+    objectParse(st, object,containerType, containerID)
 % Determine properties of a Flywheel SDK object.
 %
 % Syntax
@@ -162,14 +162,8 @@ else
         containerType = oType;
         
         if isequal(oType, 'fileentry')
-            % We no longer know the file container type, but that doesn't
-            % matter because we have the file.download function, wherever
-            % it is.
-            %
-            % And files do not yet have an id.
-            %
-            % warning('File "id" not yet implemented')
-            fileContainerType = '';
+            fileContainer = st.fw.getContainer(object.parent.id);
+            fileContainerType = stObjectType(fileContainer);
             fileType = object.type;
             fname    = object.name;
             containerID = object.id;   % For files, this is bogus
