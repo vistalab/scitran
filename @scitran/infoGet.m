@@ -5,16 +5,16 @@ function info = infoGet(st,container,varargin)
 %    scitran.infoGet(container,...)
 %
 % Description
-%  Flywheel objects have an associated set of metadata called 'info'.
-%  This method returns the info specified by 'infotype'.  There are
-%  several possible info types, specified below in the optional
-%  key/value input.
+%  Flywheel objects have an associated set of metadata. This method
+%  returns the info slot specified by 'infotype'.  There are several
+%  possible info types, specified below in the optional key/value
+%  input.
 %
 % Input (required)
 %   container - A Flywheel container
 %   
 % Optional key/value pairs
-%   'info type'      - 'info' (default),'tag','note' - TODO: add roi?
+%   'info type'      - 'info' (default),'tag','note', 'all'
 %
 % Return
 %  info - Returned information field.  Either info, tag or note.
@@ -97,19 +97,22 @@ switch containerType
       % The 'file' data type is handled a little differently.
     case 'fileentry'
         
-        fileContainerType = stType(container.parent);
+        % The file name
         fname = container.name;
-        containerID = container.parent.id;
-        
-        switch fileContainerType
+
+        % The ID of the file's parent
+        parentContainerID = container.parent.id;
+
+        % Based on the type of the file's parent, make the right call
+        switch stType(container.parent)
             case 'project'
-                meta = st.fw.getProjectFileInfo(containerID,fname);
+                meta = st.fw.getProjectFileInfo(parentContainerID,fname);
             case 'session'
-                meta = st.fw.getSessionFileInfo(containerID,fname);
+                meta = st.fw.getSessionFileInfo(parentContainerID,fname);
             case 'acquisition'
-                meta = st.fw.getAcquisitionFileInfo(containerID,fname);
+                meta = st.fw.getAcquisitionFileInfo(parentContainerID,fname);
             case 'collection'
-                meta = st.fw.getCollectionFileInfo(containerID,fname);
+                meta = st.fw.getCollectionFileInfo(parentContainerID,fname);
         end
 end
 
@@ -134,8 +137,10 @@ switch infoType
         elseif isfield(meta,'classification')
             info = meta.classification; 
         end
+    case 'all'
+        info = meta;
     otherwise
-        warning('No option for %s.  Returning info\n',infoType);
+        warning('No option for %s.  Returning info (default)\n',infoType);
         info = meta.info;
 end
 
