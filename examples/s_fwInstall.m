@@ -4,6 +4,7 @@
 % Profile.  Choose the download for your system type.
 %
 %% If you are on a Mac
+%
 % You can download and install it.  However, it will
 % not run immediately because it is not trusted by the MacOS.
 %
