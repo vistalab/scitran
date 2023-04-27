@@ -163,10 +163,10 @@ thisSession = stSessionExists(sessions,sessionLabel,...
 % A session for this subject does not exist, so create it.
 if isempty(thisSession)
     % Create it from the project level
-    thisSession = project.addSession(struct('label', sessionLabel, ...
-        'project', idS.project));
+    % thisSession = project.addSession('label', sessionLabel);
+    thisSession = thisSubject.addSession('label',sessionLabel);
     obj.containerSet(thisSession,'timestamp',datetime('now'));
-    obj.containerSet(thisSession,'subject',thisSubject);
+    % obj.containerSet(thisSession,'subject',thisSubject);
 end
 idS.session = thisSession.id;
 
