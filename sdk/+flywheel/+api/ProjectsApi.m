@@ -80,11 +80,13 @@ classdef ProjectsApi < handle
         function [returnData, resp] = addProject(obj, body, varargin)
             % Create a new project
             % body (Project)
+            % inherit (logical)
             % returns: [ContainerNewOutput, resp]
 
             x__inp = inputParser;
             x__inp.StructExpand = false;
             addRequired(x__inp, 'body');
+            addParameter(x__inp, 'inherit', []);
             addParameter(x__inp, 'DumpResponseData', false);
             parse(x__inp, body, varargin{:});
 
@@ -93,6 +95,9 @@ classdef ProjectsApi < handle
 
             % Query parameters
             queryParams = {};
+            if ~isempty(x__inp.Results.inherit)
+                queryParams = [queryParams, 'inherit', flywheel.ApiClient.castParam(x__inp.Results.inherit, 'logical')];
+            end
 
             % Header parameters
             headers = {};
@@ -303,7 +308,7 @@ classdef ProjectsApi < handle
         function [returnData, resp] = addProjectPermission(obj, projectId, body, varargin)
             % Add a permission
             % projectId (char)
-            % body (Permission)
+            % body (RolesRoleAssignment)
             % returns: [InlineResponse200, resp]
 
             x__inp = inputParser;
@@ -330,7 +335,7 @@ classdef ProjectsApi < handle
             files = {};
 
             % Body (as JSON)
-            body = flywheel.model.Permission.ensureIsInstance(x__inp.Results.body);
+            body = flywheel.model.RolesRoleAssignment.ensureIsInstance(x__inp.Results.body);
             body = flywheel.ApiClient.encodeJson(body.toJson());
 
             resp = obj.apiClient.callApi('POST', '/projects/{ProjectId}/permissions', ...
@@ -1674,11 +1679,12 @@ classdef ProjectsApi < handle
             end
         end
 
-        function [returnData, resp] = endProjectPackfileUpload(obj, projectId, token, metadata, varargin)
+        function [returnData, resp] = endProjectPackfileUpload(obj, projectId, token, metadata, fileCount, varargin)
             % End a packfile upload
             % projectId (char)
             % token (char)
             % metadata (char):string-encoded metadata json object.
+            % fileCount (char):Number of files uploaded into this packfile.
             % returns: [none, resp]
 
             x__inp = inputParser;
@@ -1686,8 +1692,9 @@ classdef ProjectsApi < handle
             addRequired(x__inp, 'projectId');
             addRequired(x__inp, 'token');
             addRequired(x__inp, 'metadata');
+            addRequired(x__inp, 'fileCount');
             addParameter(x__inp, 'DumpResponseData', false);
-            parse(x__inp, projectId, token, metadata, varargin{:});
+            parse(x__inp, projectId, token, metadata, fileCount, varargin{:});
 
             % Path parameters
             pathParams = {};
@@ -1702,6 +1709,9 @@ classdef ProjectsApi < handle
             end
             if ~isempty(x__inp.Results.metadata)
                 queryParams = [queryParams, 'metadata', flywheel.ApiClient.castParam(x__inp.Results.metadata, 'char')];
+            end
+            if ~isempty(x__inp.Results.fileCount)
+                queryParams = [queryParams, 'file_count', flywheel.ApiClient.castParam(x__inp.Results.fileCount, 'char')];
             end
 
             % Header parameters
@@ -2550,7 +2560,7 @@ classdef ProjectsApi < handle
             % List a user's permissions for this project.
             % projectId (char)
             % userId (char)
-            % returns: [Permission, resp]
+            % returns: [InlineResponse2003, resp]
 
             x__inp = inputParser;
             x__inp.StructExpand = false;
@@ -2593,7 +2603,7 @@ classdef ProjectsApi < handle
                         disp(x__respData);
                     end
                     json = flywheel.ApiClient.getResponseJson(resp);
-                    returnData = flywheel.model.Permission.fromJson(json, obj.context_);
+                    returnData = flywheel.model.InlineResponse2003.fromJson(json, obj.context_);
                     if ~isempty(returnData)
                         returnData = returnData.returnValue();
                     end
@@ -2720,7 +2730,7 @@ classdef ProjectsApi < handle
             % projectId (char)
             % fileName (char)
             % body (FileEntry)
-            % returns: [InlineResponse2004, resp]
+            % returns: [InlineResponse2005, resp]
 
             x__inp = inputParser;
             x__inp.StructExpand = false;
@@ -2765,7 +2775,7 @@ classdef ProjectsApi < handle
                         disp(x__respData);
                     end
                     json = flywheel.ApiClient.getResponseJson(resp);
-                    returnData = flywheel.model.InlineResponse2004.fromJson(json, obj.context_);
+                    returnData = flywheel.model.InlineResponse2005.fromJson(json, obj.context_);
                     if ~isempty(returnData)
                         returnData = returnData.returnValue();
                     end
@@ -2779,7 +2789,7 @@ classdef ProjectsApi < handle
             % projectId (char)
             % fileName (char)
             % body (ClassificationUpdateInput)
-            % returns: [InlineResponse2004, resp]
+            % returns: [InlineResponse2005, resp]
 
             x__inp = inputParser;
             x__inp.StructExpand = false;
@@ -2824,7 +2834,7 @@ classdef ProjectsApi < handle
                         disp(x__respData);
                     end
                     json = flywheel.ApiClient.getResponseJson(resp);
-                    returnData = flywheel.model.InlineResponse2004.fromJson(json, obj.context_);
+                    returnData = flywheel.model.InlineResponse2005.fromJson(json, obj.context_);
                     if ~isempty(returnData)
                         returnData = returnData.returnValue();
                     end
@@ -3048,7 +3058,7 @@ classdef ProjectsApi < handle
             % Update a user's permission for this project.
             % projectId (char)
             % userId (char)
-            % body (Permission)
+            % body (RolesRoleAssignment)
             % returns: [InlineResponse200, resp]
 
             x__inp = inputParser;
@@ -3079,7 +3089,7 @@ classdef ProjectsApi < handle
             files = {};
 
             % Body (as JSON)
-            body = flywheel.model.Permission.ensureIsInstance(x__inp.Results.body);
+            body = flywheel.model.RolesRoleAssignment.ensureIsInstance(x__inp.Results.body);
             body = flywheel.ApiClient.encodeJson(body.toJson());
 
             resp = obj.apiClient.callApi('PUT', '/projects/{ProjectId}/permissions/{UserId}', ...

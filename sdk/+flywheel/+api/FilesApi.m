@@ -4,8 +4,14 @@
 %    apiClient - ApiClient instance
 %
 % FilesApi Methods
+%    addFileTags          - Add list of tags on a file.
 %    createDownloadTicket - Create a download ticket
+%    deleteFile           - Delete a File
 %    downloadTicket       - Download files listed in the given ticket.
+%    getFile              - Get File
+%    getFileVersions      - Get Versions
+%    restoreFile          - Restore a File
+%    setFileTags          - Set list of tags on a file.
 %    uploadByLabel        - Multipart form upload with N file fields, each with their desired filename.
 %    uploadByReaper       - Bottom-up UID matching of Multipart form upload with N file fields, each with their desired filename.
 %    uploadByUid          - Multipart form upload with N file fields, each with their desired filename.
@@ -21,6 +27,60 @@ classdef FilesApi < handle
         function obj = FilesApi(apiClient, context)
             obj.apiClient = apiClient;
             obj.context_ = context;
+        end
+
+        function [returnData, resp] = addFileTags(obj, fileId, body, varargin)
+            % Add list of tags on a file.
+            % fileId (char)
+            % body (vector[char])
+            % returns: [InlineResponse200, resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addRequired(x__inp, 'body');
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, body, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = x__inp.Results.body;
+            body = flywheel.ApiClient.encodeJson(body.toJson());
+
+            resp = obj.apiClient.callApi('PATCH', '/files/{FileId}/tags', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.model.InlineResponse200.fromJson(json, obj.context_);
+                    if ~isempty(returnData)
+                        returnData = returnData.returnValue();
+                    end
+                otherwise
+                    returnData = [];
+            end
         end
 
         function [returnData, resp] = createDownloadTicket(obj, body, varargin)
@@ -92,6 +152,62 @@ classdef FilesApi < handle
             end
         end
 
+        function [returnData, resp] = deleteFile(obj, fileId, varargin)
+            % Delete a File
+            % fileId (char)
+            % version (integer)
+            % returns: [InlineResponse2002, resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addParameter(x__inp, 'version', []);
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+            if ~isempty(x__inp.Results.version)
+                queryParams = [queryParams, 'version', flywheel.ApiClient.castParam(x__inp.Results.version, 'integer')];
+            end
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = {};
+
+            resp = obj.apiClient.callApi('DELETE', '/files/{FileId}', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.model.InlineResponse2002.fromJson(json, obj.context_);
+                    if ~isempty(returnData)
+                        returnData = returnData.returnValue();
+                    end
+                otherwise
+                    returnData = [];
+            end
+        end
+
         function [returnData, resp] = downloadTicket(obj, ticket, varargin)
             % Download files listed in the given ticket.
             % ticket (char):ID of the download ticket
@@ -138,6 +254,225 @@ classdef FilesApi < handle
                         returnData = destFile;
                     else
                         returnData = resp.getBodyData(x__inp.Results.OutputType);
+                    end
+                otherwise
+                    returnData = [];
+            end
+        end
+
+        function [returnData, resp] = getFile(obj, fileId, varargin)
+            % Get File
+            % fileId (char)
+            % version (integer)
+            % returns: [FileEntry, resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addParameter(x__inp, 'version', []);
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+            if ~isempty(x__inp.Results.version)
+                queryParams = [queryParams, 'version', flywheel.ApiClient.castParam(x__inp.Results.version, 'integer')];
+            end
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = {};
+
+            resp = obj.apiClient.callApi('GET', '/files/{FileId}', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.model.FileEntry.fromJson(json, obj.context_);
+                    if ~isempty(returnData)
+                        returnData = returnData.returnValue();
+                    end
+                otherwise
+                    returnData = [];
+            end
+        end
+
+        function [returnData, resp] = getFileVersions(obj, fileId, varargin)
+            % Get Versions
+            % fileId (char)
+            % returns: [vector[FileVersionOutput], resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = {};
+
+            resp = obj.apiClient.callApi('GET', '/files/{FileId}/versions', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.ModelBase.cellmap(@(x) flywheel.model.FileVersionOutput.fromJson(x, obj.context_), json);
+                otherwise
+                    returnData = [];
+            end
+        end
+
+        function [returnData, resp] = restoreFile(obj, fileId, version, evaluateGearRules, varargin)
+            % Restore a File
+            % fileId (char)
+            % version (integer)
+            % evaluateGearRules (logical):Specify if gear rules should be reevaluated on the newly created file version
+            % returns: [FileEntry, resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addRequired(x__inp, 'version');
+            addRequired(x__inp, 'evaluateGearRules');
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, version, evaluateGearRules, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+            if ~isempty(x__inp.Results.version)
+                queryParams = [queryParams, 'version', flywheel.ApiClient.castParam(x__inp.Results.version, 'integer')];
+            end
+            if ~isempty(x__inp.Results.evaluateGearRules)
+                queryParams = [queryParams, 'evaluate_gear_rules', flywheel.ApiClient.castParam(x__inp.Results.evaluateGearRules, 'logical')];
+            end
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = {};
+
+            resp = obj.apiClient.callApi('POST', '/files/{FileId}/restore', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.model.FileEntry.fromJson(json, obj.context_);
+                    if ~isempty(returnData)
+                        returnData = returnData.returnValue();
+                    end
+                otherwise
+                    returnData = [];
+            end
+        end
+
+        function [returnData, resp] = setFileTags(obj, fileId, body, varargin)
+            % Set list of tags on a file.
+            % fileId (char)
+            % body (vector[char])
+            % returns: [InlineResponse200, resp]
+
+            x__inp = inputParser;
+            x__inp.StructExpand = false;
+            addRequired(x__inp, 'fileId');
+            addRequired(x__inp, 'body');
+            addParameter(x__inp, 'DumpResponseData', false);
+            parse(x__inp, fileId, body, varargin{:});
+
+            % Path parameters
+            pathParams = {};
+            if ~isempty(x__inp.Results.fileId)
+                pathParams = [pathParams, 'FileId', x__inp.Results.fileId];
+            end
+
+            % Query parameters
+            queryParams = {};
+
+            % Header parameters
+            headers = {};
+
+            % Form parameters
+            formParams = {};
+            files = {};
+
+            % Body (as JSON)
+            body = x__inp.Results.body;
+            body = flywheel.ApiClient.encodeJson(body.toJson());
+
+            resp = obj.apiClient.callApi('PUT', '/files/{FileId}/tags', ...
+                pathParams, queryParams, headers, body, formParams, files);
+
+            status = resp.getStatusCode();
+
+            switch num2str(status)
+                case '200'
+                    if x__inp.Results.DumpResponseData
+                        x__respData = resp.getBodyAsString();
+                        disp(x__respData);
+                    end
+                    json = flywheel.ApiClient.getResponseJson(resp);
+                    returnData = flywheel.model.InlineResponse200.fromJson(json, obj.context_);
+                    if ~isempty(returnData)
+                        returnData = returnData.returnValue();
                     end
                 otherwise
                     returnData = [];

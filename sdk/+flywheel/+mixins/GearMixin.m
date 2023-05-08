@@ -97,7 +97,9 @@ classdef GearMixin < handle
             for i = 1:numel(fields)
                 name = fields{i};
                 field = config.(name);
-                result.(name) = field.default;
+                if isfield(config.(name), 'default')
+                    result.(name) = field.default;
+                end
             end
         end
         function result = run(obj, varargin)

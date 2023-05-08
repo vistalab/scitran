@@ -1,5 +1,9 @@
 %% Example of copying a project from FW-A to FW-B
-
+%
+% The instructions for how to do this are on the FLywheel manual page at
+%
+%    https://docs.flywheel.io/hc/en-us/articles/360059289793
+%
 
 %% API Keys
 source      = 'cni.stanford.edu';

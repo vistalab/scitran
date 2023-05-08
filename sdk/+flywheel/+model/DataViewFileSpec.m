@@ -357,7 +357,7 @@
                 obj.props_('filter') = flywheel.model.DataViewNameFilterSpec.fromJson(json.filter, context);
             end
             if isfield(json, 'zipMember')
-                obj.props_('zipMember') = flywheel.model.DataViewNameFilterSpec.fromJson(json.zipMember, context);
+                obj.props_('zipMember') = flywheel.model.DataViewZipFilterSpec.fromJson(json.zipMember, context);
             end
             if isfield(json, 'match')
                 obj.props_('match') = flywheel.ModelBase.deserializeValue(json.match, 'char');
@@ -393,7 +393,7 @@
                     obj.props_('filter') =  flywheel.model.DataViewNameFilterSpec.ensureIsInstance(obj.props_('filter'));
                 end
                 if isKey(obj.props_, 'zipMember')
-                    obj.props_('zipMember') =  flywheel.model.DataViewNameFilterSpec.ensureIsInstance(obj.props_('zipMember'));
+                    obj.props_('zipMember') =  flywheel.model.DataViewZipFilterSpec.ensureIsInstance(obj.props_('zipMember'));
                 end
                 if isKey(obj.props_, 'match')
                 end
