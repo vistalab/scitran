@@ -5,6 +5,13 @@ function [status, id, results] = exist(st, objectType, label, varargin)
 %
 % Searches for a type of object with a specific (case-sensitive) label.
 %
+% Inputs
+%   objectType - group, project, session, or acquisition
+%   label - labe (string) of the object
+%   
+% Optional
+%   parentID - Required for session and acquisition
+%
 % Returns:
 %   status  - Logical (true/false)
 %   id      - The id of the object(s) (acq, or session, or project)
