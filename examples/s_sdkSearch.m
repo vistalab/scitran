@@ -8,8 +8,8 @@
 st = scitran('stanfordlabs');
 
 %% Read the project
-% pname = 'ISETAutoEval20200108';  % Fails.
-pname = 'CameraEval20190626';  % So far, all files were found.
+pname = 'ISETAutoEval20200108';  % Fails.
+%pname = 'CameraEval20190626';  % So far, all files were found.
 project = st.lookup(sprintf('wandell/%s',pname));
 
 % We check the renderings only; the scenes acquisitions are not sorted and
@@ -19,7 +19,7 @@ renderings = stSelect(subjects,'label','renderings','nocell',true);
 allSessions = renderings.sessions();
 fprintf('%d sessions for the renderings subject.\n',numel(allSessions));
 
-thisLabel = 'city2';
+thisLabel = 'city1';
 sessions = stSelect(allSessions,'label',thisLabel,'contains',true);
 fprintf('%d sessions with label %s.\n',numel(sessions),thisLabel);
 
@@ -45,14 +45,16 @@ for ss=1:numel(sessions)
             % disp(srch);
             result = st.fw.search(srch);
             if isempty(result) 
-                warning('Empty result on session %d acq %d file %d',ss, aa,ff);
+                warning('\nEmpty result\n session %s\n acq %s\n file %s\n',...
+                    thisSession.label, thisAcquisition.label,fname);
                 eCount = eCount + 1;
             elseif ~isequal(result{1}.acquisition.label, thisAcquisition.label)
                 warning('Wrong acquisiton label on acq %d file %d',aa,ff);
                 eCount = eCount + 1;
             else
-                fprintf('%d ',length(fname));
-                if ~mod(aa,20), fprintf('\n'); end
+                if mod(aa,20), fprintf('+ ');
+                else, fprintf('\n'); 
+                end
             end
         end
         if eCount > 10, break; end
