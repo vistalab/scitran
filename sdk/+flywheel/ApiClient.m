@@ -45,14 +45,14 @@ classdef ApiClient < handle
     methods(Static)
         function json = encodeJson(data)
             % Changed for Apple Silicon at Work by BW.
-            % json = jsonio.jsonwrite(data, struct('ReplacementStyle', 'hex'));
-            json = jsonwrite(data, struct('ReplacementStyle', 'hex'));
+            json = jsonio.jsonwrite(data, struct('ReplacementStyle', 'hex'));
+            % json = jsonwrite(data, struct('ReplacementStyle', 'hex'));
         end
         function json = getResponseJson(resp)
             body = resp.getBodyAsString().toCharArray';
             % Changed for Apple Silicon at Work by BW.
-            % json = jsonio.jsonread(body, struct('ReplacementStyle', 'hex'));
-            json = jsonread(body, struct('ReplacementStyle', 'hex'));
+            json = jsonio.jsonread(body, struct('ReplacementStyle', 'hex'));
+            % json = jsonread(body, struct('ReplacementStyle', 'hex'));
         end
         function result = getResponseError(resp)
             result = [];
