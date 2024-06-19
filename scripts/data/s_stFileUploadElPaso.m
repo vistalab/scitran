@@ -14,14 +14,15 @@ chdir('Project')
 
 subjectDirs = dir('Subject_*');
 
-for ss = 1 % :numel(subjectDirs)
+for ss = 1:numel(subjectDirs)
     thisSubject = subjectDirs(ss).name;
     chdir(thisSubject)
 
     % Write a function ieDirClean to return clean list, without a .
     sessionDirs = dir;
-    isDotFile = startsWith({sessionDirs.name},'.');
+    isDotFile   = startsWith({sessionDirs.name},'.');
     sessionDirs = sessionDirs(~isDotFile);
+
     for sess=1:numel(sessionDirs)
         chdir(sessionDirs(sess).name)
         if ~exist('velscope','dir'), mkdir('velscope'); end
@@ -39,7 +40,6 @@ for ss = 1 % :numel(subjectDirs)
                 img = imrotate(img,-90);
                 imagesc(img); axis image;
             end
-
             rgb = mean(img,[1 2]);
 
             % The Velscope files are always very green.  They are
