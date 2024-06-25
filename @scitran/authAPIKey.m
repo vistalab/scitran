@@ -3,7 +3,16 @@ function authAPIKey(obj, instance,varargin)
 %
 %    st.authAPIKey(instance, varargin)
 %
-% The API key is generated under the User -> Profile (typically upper right).
+% Description
+%
+%  This file reads the stored API key by scitran.  It inside of the
+%  field st.token, which is not publicly visible.  To get the stored
+%  token, you can stop this code around line 90, after it is read in.
+%  st.token is the login string.
+%
+%  On the Flywheel side, the API key is generated under the User ->
+%  Profile (typically upper right) on the FLywheel site. There is a
+%  new modern APIKey generator at the bottom of the page.
 %
 % This routine is invoked by the scitran constructor, and not usually
 % needed by the user.
