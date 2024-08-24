@@ -44,13 +44,29 @@ tarFileName1 = st.containerDownload('session',session{1}.id);
 untar(tarFileName1);
 
 %% Download an acquisition
-
+%{
 acquisition = st.search('acquisition',...
     'project label contains','SOC',...
     'session label exact','stimuli');
 id = idGet(acquisition{1},'data type','acquisition');
 tarFileName2 = st.containerDownload('acquisition',id);
 untar(tarFileName2);
+%}
+
+%% Download an acquisition
+
+acquisition = st.search('acquisition',...
+    'project label contains','SOC',...
+    'session label exact','stimuli');
+id = idGet(acquisition{1},'data type','acquisition');
+tarFileName2 = st.containerDownload('acquisition',id);
+untar(tarFileName2);%% Download an acquisition
+
+acquisition = st.search('acquisition',...
+    'project label contains','SOC',...
+    'session label exact','stimuli');
+id = idGet(acquisition{1},'data type','acquisition');
+tarFileName2 = st.containerDownload('acquisition',id);
 
 %%
 delete(tarFileName1);
