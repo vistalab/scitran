@@ -1,4 +1,6 @@
-%% s_stFileDownload
+%% s_stPBRTDownload
+%
+% Dealing with Flywheel downloads and scitran for the graphics.
 %
 % Download examples:
 %    JSON file from a projects
