@@ -1,91 +1,65 @@
-function dt = dr_fwReadDtFromAnalysisTable(serverName, t, measurement)
-% REWRITE AND OPTIMIZE THIS FUNCTION: This function will take a filtered table obtained from dr_fwCheckJobs
-% and it will create a result datatable out of it. 
+function dt = dr_singReadDtFromAnalysisTable(bdir,subSesList, measurements,...
+                                             tool,an,proj,...
+                                             pretool_fs,...
+                                             pretool_preproc)
 
 % Example inputs to make it work
 %{
-clear all; clc; 
-serverName       = 'stanfordlabs';
-collectionName   = 'ComputationalReproducibility';  % 'tmpCollection', 'ComputationalReproducibility', 'FWmatlabAPI_test'
-% collectionName = 'HCP_Depression';%  'WH_042_volume_test';
-% collectionName = 'HCP-DES';
-% measurement    = 'volume';  % 
+  % BERTSOLARI
+  bdir            = "/export/home/glerma/public/Gari/BERTSOLARI/Nifti";
+  subSesList      = fullfile(getenv('pM'),'subSesList_BERTSOLARI.txt');
+  proj            = "BERTSO";  
 
+  % KSHIPRA
+  bdir            = "/export/home/glerma/public/KSHIPRA/dwibygari/Nifti";
+  subSesList      = fullfile(bdir,'subSesList.txt');
+  proj            = "KSHIPRA";  
 
-    % GET ALL ANALYSIS FROM COLLECTION
-    JL = dr_fwCheckJobs(serverName, collectionName);
-    height(JL)
-    % FILTER
-    state       = 'complete';  % 'cancelled', 'pending', 'complete', 'running', 'failed'
-    % gearName    = 'afq-pipeline-3'; gearVersion = '3.0.0_rc4';
-    gearName    = 'afq-pipeline'; gearVersion = '3.0.6';
-    dateFrom  = '04-Feb-2019 00:00:00';
-    labelContains = 'AllV03:v3.0.6';
-    state='complete'
-    t = JL(JL.state==state & JL.gearName==gearName & ...
-           JL.gearVersion==gearVersion & JL.JobCreated>dateFrom & ...
-           contains(string(JL.label), labelContains),:);
-    height(t)
+  measurements    = {'fa','ad','cl','curvature','md','rd','torsion','volume'};
+  tool            = "rtp-pipeline_4.3.7";
+  an              = "01";
+  pretool_fs      = {'fs_7.1.1-03d','analysis-01'};
+  pretool_preproc = {'rtppreproc_1.1.3','analysis-01'};
 
-
-measurements      = {'fa','ad','cl','curvature','md','rd','torsion','volume'};
-dt = dr_fwReadDtFromAnalysisTable(serverName, t, measurements);
-fname = fullfile(stRootPath,'local','tmp', ...
-                 sprintf('AllV04_multiSiteAndMeas_%s.mat',collectionName));
+% READ AND SAVE IT LOCALLY
+dt = dr_singReadDtFromAnalysisTable(bdir,subSesList, measurements,...
+                                             tool,an,proj,...
+                                             pretool_fs,...
+                                             pretool_preproc);
+% if ~isfolder(fullfile(stRootPath,'local','tmp'));mkdir(fullfile(stRootPath,'local','tmp'));end
+% fname = fullfile(stRootPath,'local','tmp', ...
+%                  sprintf('AllV01_AllMeas_%s.mat',proj));
+fname = fullfile('/export/home/glerma/public/KSHIPRA/dwibygari', ...
+                 sprintf('AllV01_AllMeas_%s.mat',proj));
 save(fname, 'dt')
-
-% Upload the data to a collection
-st   = scitran('stanfordlabs'); st.verify;
-cc   = st.search('collection','collection label exact',collectionName);
-stts = st.fileUpload(fname,cc{1}.collection.id,'collection');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+% Convert to CSV (simplify first)
+dts=dt(:,{'SubjID','TRT','Struct','fa','ad','cl','curvature','md','rd','torsion','volume'});
+dts.SubjID=categorical(dts.SubjID);
+writetable(dts,fullfile('/export/home/glerma/public/KSHIPRA/dwibygari','diffusionResults.csv'))
 
 
 
 % VISUALIZE RESULTS
+close all
 subplot(2,1,1)
-% plot(dt{dt.Struct=='LeftArcuate' & dt.TRT=='TEST','Val'}'); hold on;
-% plot(dt{dt.Struct=='RightArcuate' & dt.TRT=='TEST','Val'}')
-plot(dt{dt.Struct=='LeftArcuate','Val'}'); hold on;
-plot(dt{dt.Struct=='RightArcuate','Val'}')
+% plot(dt{dt.Struct=='LeftIFOF' & dt.TRT=='T01','fa'}','r'); hold on;
+% plot(dt{dt.Struct=='RightIFOF' & dt.TRT=='T01','fa'}','b')
+plot(dt{dt.Struct=='LeftArcuate','fa'}'); hold on;
+plot(dt{dt.Struct=='RightArcuate','fa'}')
 title('LeftRightArcuate'); xlabel('Profile divisions'); ylabel('FA')
 
-leg1 = strcat(string(dt.Struct(dt.Struct=='LeftArcuate')), "-", ...
-              dt.SubjID(dt.Struct=='LeftArcuate'), "-", ...
-              string(dt.TRT(dt.Struct=='LeftArcuate')), "-", ...
-              string(dt.AcquMD.scanbValue(dt.Struct=='LeftArcuate')));
-leg2 = strcat(string(dt.Struct(dt.Struct=='RightArcuate')), "-", ...
-              dt.SubjID(dt.Struct=='RightArcuate'), "-", ...
-              string(dt.TRT(dt.Struct=='RightArcuate')), "-", ...
-              string(dt.AcquMD.scanbValue(dt.Struct=='RightArcuate')));
-legend([leg1;leg2])
+% leg1 = strcat(string(dt.Struct(dt.Struct=='LeftArcuate')), "-", ...
+%               dt.SubjID(dt.Struct=='LeftArcuate'), "-", ...
+%                string(dt.TRT(dt.Struct=='LeftArcuate')), "-", ...
+%               string(dt.AcquMD.scanbValue(dt.Struct=='LeftArcuate')));
+% leg2 = strcat(string(dt.Struct(dt.Struct=='RightArcuate')), "-", ...
+%               dt.SubjID(dt.Struct=='RightArcuate'), "-", ...
+%               string(dt.TRT(dt.Struct=='RightArcuate')), "-", ...
+%               string(dt.AcquMD.scanbValue(dt.Struct=='RightArcuate')));
+% legend([leg1;leg2])
 subplot(2,1,2)
-dt=dtxfom;
-plot(dt{dt.Struct=='LeftArcuate' & dt.TRT=='TEST','Val'}'); hold on;
-plot(dt{dt.Struct=='RightArcuate' & dt.TRT=='TEST','Val'}')
+plot(dt{dt.Struct=='LeftArcuate' & dt.TRT=='TEST','fa'}'); hold on;
+plot(dt{dt.Struct=='RightArcuate' & dt.TRT=='TEST','fa'}')
 title('LeftRightArcuate'); xlabel('Profile divisions'); ylabel('FA')
 
 leg1 = strcat(string(dt.Struct(dt.Struct=='LeftArcuate')), "-", ...
@@ -101,9 +75,17 @@ legend([leg1;leg2])
 
 
 
-%% Connect to the server and verify the connection
-st = scitran(serverName);
-st.verify
+%% Check the files are there
+t      = readtable(subSesList);
+t.sub  = categorical(t.sub);
+t.ses  = categorical(t.ses);
+t.RUN  = strcmp(t.RUN,'True');
+t.anat = strcmp(t.anat,'True');
+t.dwi  = strcmp(t.dwi,'True');
+t.func = strcmp(t.func,'True');
+
+% Add only the analyses we want
+t = t(t.RUN,:);
 
 
 %% Create the table that we will later populate. 
@@ -113,9 +95,9 @@ st.verify
 % in freesurfer or others. 
 
 % if measurements is cell, then add them in parallel
-if iscell(measurement)
+if iscell(measurements)
     TableElements = {'SubjID','TRT','Proj','SubjectMD','AcquMD','AnalysisMD', 'Struct'};
-    TableElements = [TableElements, measurement];
+    TableElements = [TableElements, measurements];
 else
     TableElements = {'SubjID','TRT','Proj','SubjectMD','AcquMD','AnalysisMD', 'measurement', 'Struct', 'Val'};
 end
@@ -163,17 +145,18 @@ interpMethod      = 'spline'; % For NaN substitution using the repnan.m method, 
 %  exact analysis and result we want. 
 %  Should be MUCH faster
 
-% Feb 2020
+% Dec 2020
 % GLU: FW has updated the api, try to make it even faster
 
 tic
 for ns=1:height(t)
-    tic
-    % fprintf('(%d) Working in session: %s >> %s (%s)\n', ns, thisProject.label, thisSession.subject.code, thisSession.label)
+    
+    sub = t{ns,'sub'};
+    ses = t{ns,'ses'};
     % Obtain AcquMD
     acquMD = dr_singObtainAcquMD();
     % Obtain all the profile values for all measures
-    VALUES = dr_fwObtainValues(st, thisAnalysis, measurement);
+    VALUES = dr_singObtainValues(bdir,tool,an,sub,ses,measurements);
     
     % Now that we have everything, we can start appending it to our big
     % table that will be the output of this query. 
@@ -184,7 +167,8 @@ for ns=1:height(t)
         Structures = VALUES.Properties.VariableNames;
     end
     for fg=1:length(Structures)
-        Structure = string(regexprep(Structures{fg},'{|}| |_',''));
+        uncleanStr = Structures{fg};
+        Structure  = string(regexprep(uncleanStr,'{|}| |_',''));
         % This version is afq centered, so when the data is extracted, the
         % profiles are extracted as a column. When the function is created,
         % I think this should be given as an option. For example, we
@@ -200,55 +184,53 @@ for ns=1:height(t)
         if fg == 1
             T            = array2table(NaN(1,length(TableElements)));
             T.Properties.VariableNames = TableElements;
-            T.SubjID     = string(thisSession.subject.code);
-            T.Proj       = categorical(string(thisProject.label));
-            T.TRT        = categorical(string(thisSession.label));
-            tmpSubjMD    = struct2table(st.fw.getSession(idGet(thisSession)).subject.struct, 'AsArray', true);
-            tmpSubjMD    = tmpSubjMD(:,~contains(tmpSubjMD.Properties.VariableNames,'permissions'));
+            T.SubjID     = string(sub);
+            T.Proj       = categorical(string(proj));
+            T.TRT        = categorical(string(ses));
+            subjMDcols   = {'AGE','GENDER'};
+            tmpSubjMD    = array2table(NaN(1,length(subjMDcols)));
+            tmpSubjMD.Properties.VariableNames = subjMDcols;
             T.SubjectMD  = tmpSubjMD;
             % T.SubjectMD.info      = struct2table(T.SubjectMD.info, 'AsArray', true);
             % Temporary hack so that all have the same info, I need to use the old
             % method to create the expanded info table:
-            infoFields = st.fw.getSession(idGet(thisSession)).subject.info.struct;
-            infofnames = fieldnames(infoFields);
-            for nf=1:length(infofnames)
-                if isempty(infoFields.(infofnames{nf}))
-                    infoFields.(infofnames{nf}) = NaN;
+            
+            % We will read info table from an excel file with the metadata
+            %{
+                infoFields = st.fw.getSession(idGet(thisSession)).subject.info.struct;
+                infofnames = fieldnames(infoFields);
+                for nf=1:length(subjMDcols)
+                    if isempty(infoFields.(infofnames{nf}))
+                        infoFields.(infofnames{nf}) = NaN;
+                    end
+                 if ischar(infoFields.(infofnames{nf}))
+                        infoFields.(infofnames{nf}) = string(infoFields.(infofnames{nf}));
+                    end
                 end
-                if ischar(infoFields.(infofnames{nf}))
-                    infoFields.(infofnames{nf}) = string(infoFields.(infofnames{nf}));
-                end
-            end
 
-            T.SubjectMD.info      = struct2table(infoFields);
-            % T.SubjectMD.info      = [];
-            if iscell(T.SubjectMD.age)
-                 T.SubjectMD.AGE       = 99;
-            else
-                T.SubjectMD.AGE       = T.SubjectMD.age / (365*24*60*60);
-            end
-            T.SubjectMD.age       = [];
-            % if isempty(T.SubjectMD.sex)
-    %            T.SubjectMD.GENDER    = [];
-            % else
-              %   T.SubjectMD.GENDER    = categorical(T.SubjectMD.sex);
-            % end
-            T.SubjectMD.sex       = [];
-            T.SubjectMD.tags      = [];
-            T.SubjectMD.files     = [];
-            T.SubjectMD.infoExists= [];
+                T.SubjectMD.info      = struct2table(infoFields);
+                % T.SubjectMD.info      = [];
+            %}
+            
             T.AcquMD     = acquMD;
-            T.AnalysisMD = struct2table(thisAnalysis.job.config.config, 'AsArray', true);
             T.Struct     = categorical(string(Structure));
+            T.AnalysisMD = dr_singObtainAnalysisMD(bdir,tool,an,sub,ses,...                                           tool,an,proj,...
+                                                   pretool_fs,...
+                                                   pretool_preproc,...
+                                                   uncleanStr);
+            
 
             % And now, assign the value vectors
             % But, if there are more than 5 NaN-s, convert all to NaN, otherwise
             % fix it
-            
+            infoFields = struct();
+            infoFields.this = 'this';
+            infoFields.that = 'that';
+            T.SubjectMD.info      = struct2table(infoFields);
             % TODO : make it a function
-            if iscell(measurement)
-                for nm = 1:length(measurement)
-                    meas     = measurement{nm};
+            if iscell(measurements)
+                for nm = 1:length(measurements)
+                    meas     = measurements{nm};
                     TMPVAL   = VALUES{nm};
                     T.(meas) = TMPVAL{:,Structures{fg}}';
                     if doNanSubstitution
@@ -265,7 +247,7 @@ for ns=1:height(t)
                     end
                 end
             else
-                T.measurement = string(measurement);
+                T.measurement = string(measurements);
                 T.Val   = VALUES{:,Structures{fg}}';
                 if doNanSubstitution
                     if sum(isnan(T.Val),2) > 0 & sum(isnan(T.Val),2) <= maxNaNsToClean
@@ -284,14 +266,15 @@ for ns=1:height(t)
             if height(dt) == 0
                 dt = T;
             else
-                dt = dr_mergeTables({dt, T},{'SubjectMD';'AcquMD';'AnalysisMD'});
+                % dt = dr_mergeTables({dt, T},{'SubjectMD';'AcquMD';'AnalysisMD'});
+                dt = [dt; T];
             end    
         else
             % T is the same for all fiber groups
             T.Struct     = categorical(string(Structure));
-            if iscell(measurement)
-                for nm = 1:length(measurement)
-                    meas     = measurement{nm};
+            if iscell(measurements)
+                for nm = 1:length(measurements)
+                    meas     = measurements{nm};
                     TMPVAL   = VALUES{nm};
                     T.(meas) = TMPVAL{:,Structures{fg}}';
                     if doNanSubstitution
@@ -326,12 +309,13 @@ for ns=1:height(t)
             if height(dt) == 0
                 dt = T;
             else
-                dt = dr_mergeTables({dt, T},{'SubjectMD';'AcquMD';'AnalysisMD'});
+                % dt = dr_mergeTables({dt, T},{'SubjectMD';'AcquMD';'AnalysisMD'});
+                dt = [dt; T];
             end 
         end
    
     end   
-    toc
+    
 end
 toc
 

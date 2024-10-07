@@ -92,6 +92,7 @@ for idx=1:length(keysToMerge)
     % HACK we verify that no rows were dropped by outerjoin since it
     % might if the rows aren't unique. In general though, we expect rows to
     % be unique.
+    % {
     if ~strcmp(key, 'SubjectMD')
         if rowCount ~= height(merged)
             error('Rows across tables were not unique for key %s. Expected %d rows, but found %d in merged table.', key, rowCount, height(merged));
@@ -99,7 +100,7 @@ for idx=1:length(keysToMerge)
         % HACK we remove the rowidx__ column
         merged = merged(:, setdiff(merged.Properties.VariableNames, {'rowidx__'}));
     end
-
+    %}
     % And add the slim and merged tables to our result.
     newTable.(key) = merged;
 end
