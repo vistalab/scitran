@@ -15,15 +15,17 @@ Setup:
       (Get API key from your account at stanford.flywheel.io)
 
 Usage:
-  python download_project.py <group_id> <project_label> [output_path] [--confirm]
+  python download_project.py <group_id> <project_label> [output_path] [options]
 
 Example:
   python download_project.py wandell achiasma
   python download_project.py wandell achiasma ./my_project.tar
   python download_project.py wandell achiasma --confirm
+  python download_project.py wandell achiasma --timeout 3600
 
 Options:
-  --confirm    Ask for confirmation before downloading
+  --confirm          Ask for confirmation before downloading
+  --timeout <secs>   Set request timeout in seconds (default: 3600)
 
 To extract the downloaded tar file:
   tar -xvf <filename>.tar
@@ -51,7 +53,7 @@ Example Mapping:
 +-----------------------------------------------------------------------+
 
 Usage for this script:
-python download_project.py <group_id> <project_label> [output_path] [--confirm]
+python download_project.py <group_id> <project_label> [output_path] [options]
 """
 
 import flywheel
@@ -61,20 +63,39 @@ import os
 def main():
     # Check for --confirm flag
     confirm_flag = '--confirm' in sys.argv
-    args = [arg for arg in sys.argv if arg != '--confirm']
+    
+    # Check for --timeout option (default 1 hour for large projects)
+    timeout = 3600
+    args = []
+    i = 0
+    while i < len(sys.argv):
+        if sys.argv[i] == '--timeout' and i + 1 < len(sys.argv):
+            try:
+                timeout = int(sys.argv[i + 1])
+            except ValueError:
+                print(f"Error: Invalid timeout value '{sys.argv[i + 1]}'")
+                sys.exit(1)
+            i += 2
+        elif sys.argv[i] == '--confirm':
+            i += 1
+        else:
+            args.append(sys.argv[i])
+            i += 1
     
     # Check if the user provided the correct number of arguments
     if len(args) < 3 or len(args) > 4:
         print()
-        print("  Usage:   python download_project.py <group_id> <project_label> [output_path] [--confirm]")
+        print("  Usage:   python download_project.py <group_id> <project_label> [output_path] [options]")
         print("  Example: python download_project.py wandell achiasma")
         print("  Example: python download_project.py wandell achiasma ./my_project.tar")
+        print("  Example: python download_project.py wandell achiasma --timeout 7200")
         print()
         print("  To find group_id:      fw ls")
         print("  To find project_label: fw ls <group_id>")
         print()
         print("  Options:")
-        print("    --confirm    Ask for confirmation before downloading")
+        print("    --confirm          Ask for confirmation before downloading")
+        print("    --timeout <secs>   Set request timeout in seconds (default: 3600)")
         print()
         sys.exit(1)
 
@@ -89,8 +110,10 @@ def main():
 
     try:
         # Connect using the credentials from your 'fw login'
-        fw = flywheel.Client()
+        # Set timeout for large downloads (default 1 hour)
+        fw = flywheel.Client(request_timeout=timeout)
         print(f"Connected to: {fw.get_config().site.id}")
+        print(f"Request timeout: {timeout} seconds")
         
         # Look up the project
         project_path = f"{group_id}/{project_label}"
