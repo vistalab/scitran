@@ -52,8 +52,13 @@ import sys
 def main():
     # Check if the user provided the correct number of arguments
     if len(sys.argv) != 3:
-        print("Usage: python delete_project.py <group_id> <project_label>")
-        print("Example: python delete_project.py snl-rad 'My Project Name'")
+        print()
+        print("  Usage:   python delete_project.py <group_id> <project_label>")
+        print("  Example: python delete_project.py nklmpg showdes")
+        print()
+        print("  To find group_id:      fw ls")
+        print("  To find project_label: fw ls <group_id>")
+        print()
         sys.exit(1)
 
     group_id = sys.argv[1]
