@@ -1,5 +1,5 @@
 """
-download_project.py - Download a Flywheel project as a ZIP file
+download_project.py - Download a Flywheel project as a tar archive
 
 Setup:
   (a) Created a virtual environment in this directory:
@@ -15,11 +15,18 @@ Setup:
       (Get API key from your account at stanford.flywheel.io)
 
 Usage:
-  python download_project.py <group_id> <project_label> [output_path]
+  python download_project.py <group_id> <project_label> [output_path] [--confirm]
 
 Example:
-  python download_project.py nklmpg showdes
-  python download_project.py nklmpg showdes /path/to/output.zip
+  python download_project.py wandell achiasma
+  python download_project.py wandell achiasma ./my_project.tar
+  python download_project.py wandell achiasma --confirm
+
+Options:
+  --confirm    Ask for confirmation before downloading
+
+To extract the downloaded tar file:
+  tar -xvf <filename>.tar
 
   FLYWHEEL HIERARCHY REFERENCE
 ---------------------------
@@ -44,7 +51,7 @@ Example Mapping:
 +-----------------------------------------------------------------------+
 
 Usage for this script:
-python download_project.py <group_id> <project_label> [output_path]
+python download_project.py <group_id> <project_label> [output_path] [--confirm]
 """
 
 import flywheel
@@ -52,26 +59,33 @@ import sys
 import os
 
 def main():
+    # Check for --confirm flag
+    confirm_flag = '--confirm' in sys.argv
+    args = [arg for arg in sys.argv if arg != '--confirm']
+    
     # Check if the user provided the correct number of arguments
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
+    if len(args) < 3 or len(args) > 4:
         print()
-        print("  Usage:   python download_project.py <group_id> <project_label> [output_path]")
-        print("  Example: python download_project.py nklmpg showdes")
-        print("  Example: python download_project.py nklmpg showdes ./my_project.zip")
+        print("  Usage:   python download_project.py <group_id> <project_label> [output_path] [--confirm]")
+        print("  Example: python download_project.py wandell achiasma")
+        print("  Example: python download_project.py wandell achiasma ./my_project.tar")
         print()
         print("  To find group_id:      fw ls")
         print("  To find project_label: fw ls <group_id>")
         print()
+        print("  Options:")
+        print("    --confirm    Ask for confirmation before downloading")
+        print()
         sys.exit(1)
 
-    group_id = sys.argv[1]
-    project_label = sys.argv[2]
+    group_id = args[1]
+    project_label = args[2]
     
-    # Set output path (default to project_label.zip in current directory)
-    if len(sys.argv) == 4:
-        output_path = sys.argv[3]
+    # Set output path (default to project_label.tar in current directory)
+    if len(args) == 4:
+        output_path = args[3]
     else:
-        output_path = f"{project_label}.zip"
+        output_path = f"{project_label}.tar"
 
     try:
         # Connect using the credentials from your 'fw login'
@@ -96,32 +110,33 @@ def main():
         
         # Check if file already exists
         if os.path.exists(output_path):
-            confirm = input(f"File '{output_path}' already exists. Overwrite? (y/n): ")
-            if confirm.lower() != 'y':
+            overwrite = input(f"File '{output_path}' already exists. Overwrite? (y/n): ")
+            if overwrite.lower() != 'y':
                 print("Download cancelled by user.")
                 sys.exit(0)
         
-        # Confirm download (projects can be large)
-        confirm = input(f"CONFIRM: Download project '{project.label}' as ZIP? (y/n): ")
+        # Confirm download if --confirm flag is set
+        if confirm_flag:
+            confirm = input(f"CONFIRM: Download project '{project.label}' as tar archive? (y/n): ")
+            if confirm.lower() != 'y':
+                print("Download cancelled by user.")
+                return
         
-        if confirm.lower() == 'y':
-            print(f"Downloading project '{project.label}'...")
-            print("This may take a while depending on project size...")
-            
-            # Download the project as a ZIP file
-            fw.download_tar(project, output_path, include_types=['input', 'output', 'analysis'])
-            
-            # Get file size for user feedback
-            file_size = os.path.getsize(output_path)
-            file_size_mb = file_size / (1024 * 1024)
-            
-            print("-" * 30)
-            print(f"Download complete!")
-            print(f"File: {output_path}")
-            print(f"Size: {file_size_mb:.2f} MB")
-            print("-" * 30)
-        else:
-            print("Download cancelled by user.")
+        print(f"Downloading project '{project.label}'...")
+        print("This may take a while depending on project size...")
+        
+        # Download the project as a tarball
+        fw.download_tar(project, output_path)
+        
+        # Get file size for user feedback
+        file_size = os.path.getsize(output_path)
+        file_size_mb = file_size / (1024 * 1024)
+        
+        print("-" * 30)
+        print(f"Download complete!")
+        print(f"File: {output_path}")
+        print(f"Size: {file_size_mb:.2f} MB")
+        print("-" * 30)
 
     except flywheel.ApiException as e:
         print(f"Flywheel Error: Could not find project '{project_path}'.")
