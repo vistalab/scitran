@@ -19,6 +19,31 @@ Usage:
 
 Example:
   python delete_project.py nklmpg showdes
+
+  FLYWHEEL HIERARCHY REFERENCE
+---------------------------
+To find the required arguments for this script, use the Flywheel CLI (fw):
+
+1. Find Group IDs:
+   $ fw ls
+   
+2. Find Project Labels (inside a group):
+   $ fw ls <group_id>
+
+3. (Optional) Find unique Project IDs:
+   $ fw ls <group_id> --id
+
+Example Mapping:
++-----------------------------------------------------------------------+
+| LEVEL    | COMMAND                               | TARGET TO USE      |
+|----------|---------------------------------------|--------------------|
+| Group    | fw ls                                 | group_id           |
+| Project  | fw ls <group_id>                      | project_label      |
+| Subject  | fw ls <group_id>/<project_label>      | subject_label      |
++-----------------------------------------------------------------------+
+
+Usage for this script:
+python delete_project.py <group_id> <project_label>
 """
 
 import flywheel
