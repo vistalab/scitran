@@ -125,6 +125,8 @@ def main():
         print(f"TARGET FOUND:")
         print(f"Label: {project.label}")
         print(f"ID:    {project.id}")
+        if project.description:
+            print("Description: Found")
         print("-" * 30)
         
         # Get absolute path for output
@@ -145,6 +147,13 @@ def main():
                 print("Download cancelled by user.")
                 return
         
+        # Save project description if it exists
+        if project.description:
+            desc_path = os.path.splitext(output_path)[0] + "_description.md"
+            print(f"Saving project description to: {desc_path}")
+            with open(desc_path, 'w') as f:
+                f.write(project.description)
+
         print(f"Downloading project '{project.label}'...")
         print("This may take a while depending on project size...")
         
