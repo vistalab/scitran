@@ -171,7 +171,14 @@ def main():
         print("-" * 30)
 
     except flywheel.ApiException as e:
-        print(f"Flywheel Error: Could not find project '{project_path}'.")
+        if e.status == 404:
+            print(f"Flywheel Error: Could not find project '{project_path}'.")
+        else:
+            print(f"Flywheel Error: {e.reason}")
+            if e.status == 504:
+                print("Details: Gateway Timeout. The server took too long to respond.")
+                print("This often happens when downloading very large projects.")
+                print("Try increasing the timeout using --timeout (e.g. --timeout 7200).")
         print(f"Status: {e.status}")
     except Exception as e:
         print(f"An error occurred: {e}")
